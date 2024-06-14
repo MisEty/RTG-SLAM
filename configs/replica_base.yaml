@@ -1,0 +1,41 @@
+parent: "configs/base.yaml"
+device_list: [1]
+save_path: "output/replica_test/debug"
+
+# dataset params:
+type: "Replica"
+source_path: "data/Replica/office0"
+
+uniform_sample_num: 40800
+
+# state manage
+stable_confidence_thres: 100
+unstable_time_window: 120
+memory_length: 5
+
+# optimize params:
+gaussian_update_iter: 50
+gaussian_update_frame: 6
+position_lr : 0.001
+feature_lr : 0.0005
+opacity_lr : 0.000
+scaling_lr : 0.004
+rotation_lr : 0.001
+final_global_iter: 20
+
+use_gt_pose: False
+icp_use_model_depth: True
+
+
+# track params
+icp_use_model_depth: True # if False, use dataset depth frame to frame
+icp_normal_threshold: 20 # degree
+icp_sample_distance_threshold: 0.01 # m
+icp_sample_normal_threshold: 0.01 # cos similarity
+
+
+feature_lr_coef: 4.0
+scaling_lr_coef: 4.0
+rotation_lr_coef: 4.0
+
+pcd_densify: True

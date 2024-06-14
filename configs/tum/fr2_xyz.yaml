@@ -1,0 +1,11 @@
+parent: "configs/tum_base.yaml"
+
+frame_start: 0
+frame_step: 0
+frame_num: -1
+
+# dataset params:
+source_path: "data/TUM_RGBD/rgbd_dataset_freiburg2_xyz"
+save_path: "output/dataset/TUM_RGBD/fr2_xyz"
+
+orb_settings_path: "configs/orb_config/tum2.yaml"

@@ -1,0 +1,30 @@
+parent: "configs/base.yaml"
+
+save_path: "output/Scannetpp/debug"
+
+# map params
+uniform_sample_num: 68620
+min_depth: 0.3
+max_depth: 10.0
+
+# dataset params:
+type: "Scannetpp"
+source_path: "data/ScanNetpp/8b5caf3398"
+
+# state manage
+stable_confidence_thres: 400
+unstable_time_window: 200
+
+# optimize params:
+gaussian_update_iter: 75
+gaussian_update_frame: 3
+position_lr : 0.001
+feature_lr : 0.0005
+opacity_lr : 0.000
+scaling_lr : 0.004
+rotation_lr : 0.001
+KNN_threshold: -1
+
+use_gt_pose: True
+
+pcd_densify: True

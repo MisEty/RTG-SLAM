@@ -1,0 +1,123 @@
+parent: None
+quiet: False
+device_list: [0]
+save_path: "output/replica_test/debug"
+use_tensorboard: True
+record_mem: False
+verbose: False
+mode: "single process"
+use_network_viewer: False
+use_online_scanner: False
+sync_tracker2mapper_method: "strict"
+sync_tracker2mapper_frames: 5
+
+# dataset params:
+type: "Replica"
+source_path: ""
+frame_start: 0
+frame_step: 0
+frame_num: -1
+save_step: 2000
+preload: False
+resolution : 1
+resolution_scales: [1.0]
+data_device: "cuda" # only cuda work
+eval: False # whether select frames for eval
+eval_llff: 2 # the step for select frame tor eavl
+init_mode: "depth" 
+
+# gaussian params
+active_sh_degree: 3
+max_sh_degree: 3
+xyz_factor: [1, 1, 0.1] # z should be smallest
+init_opacity: 0.99
+scale_factor: 1.0
+max_radius: 0.05
+min_radius: 0.001
+
+# map preprocess
+min_depth: 0.3
+max_depth: 5.0
+depth_filter: False
+invalid_confidence_thresh: 0.2
+global_keyframe_num: 3
+
+# map params
+memory_length: 1
+uniform_sample_num: 50000
+add_transmission_thres: 0.5
+transmission_sample_ratio: 1.0
+error_sample_ratio: 0.05
+add_depth_thres: 0.1
+add_color_thres: 0.1
+add_normal_thres: 1000
+history_merge_max_weight: 0.5
+
+# state manage
+keyframe_trans_thes: 0.3
+keyframe_theta_thes: 30
+stable_confidence_thres: 500
+unstable_time_window: 200
+KNN_num: 15
+KNN_threshold: -1
+
+# render params
+renderer_opaque_threshold: 0.6
+renderer_normal_threshold: 60
+renderer_depth_threshold: 1.0
+color_sigma: 3.0
+render_mode: "ours" # "torch", "ours"
+depth_mode: "normal" # 'alpha', "opaque", "normal"
+global_opt_top_ratio: 0.4
+
+
+# optimize params:
+gaussian_update_iter: 100
+gaussian_update_frame: 5
+final_global_iter: 10
+color_weight: 0.8
+depth_weight: 1.0
+ssim_weight: 0.2
+normal_weight: 0.0
+position_lr : 0.001
+feature_lr : 0.0005
+opacity_lr : 0.000
+scaling_lr : 0.004
+rotation_lr : 0.001
+feature_lr_coef: 1.0
+scaling_lr_coef: 1.0
+rotation_lr_coef: 1.0
+
+# ICP
+use_gt_pose: True
+icp_use_model_depth: False # if False, use dataset depth frame to frame
+icp_downscales: [0.25, 0.5, 1.0]
+icp_damping: 0.0001
+icp_downscale_iters: [5, 5, 5]
+icp_distance_threshold: 0.1 # m
+icp_normal_threshold: 20 # degree
+icp_sample_distance_threshold: 0.01 # m
+icp_sample_normal_threshold: 0.01 # cos similarity
+icp_warmup_frames: 0
+icp_fail_threshold: 0.02
+
+# orb backend
+use_orb_backend: False
+use_orb_viewer: False
+orb_vocab_path: "thirdParty/ORB-SLAM2-PYBIND/Vocabulary/ORBvoc.txt"
+orb_settings_path: ""
+tracker_max_fps: 15
+orb_useicp: True
+
+sync_tracker2mapper_method : "strict"
+# strict: mapping : tracker == 1 : sync_tracker2mapper_frames
+# loose: tracker frame_id should be: [mapper_frame_id - sync_tracker2mapper_frames, 
+#                                     mapper_frame_id + sync_tracker2mapper_frames]
+# free: there is no sync
+sync_tracker2mapper_frames : 5
+system_verbose: False
+tracker_max_fps: 30
+
+# evaluate
+renderer_opaque_threshold_eval: 0.5
+pcd_densify: False

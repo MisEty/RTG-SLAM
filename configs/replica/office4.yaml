@@ -1,0 +1,10 @@
+parent: "configs/replica_base.yaml"
+save_step: 400
+
+frame_start: 0
+frame_step: 0
+frame_num: -1
+
+# dataset params:
+source_path: "./data/Replica/office4"
+save_path: "output/dataset/Replica/office4"

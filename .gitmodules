@@ -1,0 +1,12 @@
+[submodule "submodules"]
+	path = submodules
+	url = git@github.com:CJAPPLE5/RTG-SLAM-cuda_utils.git
+	branch = main
+[submodule "thirdParty/pybind"]
+	path = thirdParty/pybind
+	url = git@github.com:CJAPPLE5/RTG-SLAM-PYBIND.git
+	branch = main
+[submodule "thirdParty/ORB-SLAM2-PYBIND"]
+	path = thirdParty/ORB-SLAM2-PYBIND
+	url = git@github.com:CJAPPLE5/RTG-SLAM-BACKEND.git
+	branch = main

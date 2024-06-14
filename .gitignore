@@ -1,0 +1,16 @@
+**/.vscode
+**/__pycache__  
+data
+output
+temp/
+*.ipynb
+boost_1_80_0
+install
+opencv-4.2.0
+Pangolin
+cuda_utils
+diff-gaussian-rasterizer-depth
+simple-knn
+*.txt
+build
+lib

@@ -1,0 +1,10 @@
+parent: "configs/scannetpp_base.yaml"
+save_step: 100
+
+frame_start: 0
+frame_step: 0
+frame_num: -1
+
+# dataset params:
+source_path: "data/ScanNetpp/b20a261fdf"
+save_path: "output/dataset/ScanNetpp/b20a261fdf"

@@ -1,0 +1,12 @@
+parent: "configs/ours_base.yaml"
+save_step: 400
+
+frame_start: 0
+frame_step: 0
+frame_num: -1
+
+# dataset params:
+source_path: "./data/Ours/office"
+save_path: "output/dataset/Ours/office"
+
+use_gt_pose: False

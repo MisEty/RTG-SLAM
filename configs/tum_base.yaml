@@ -1,0 +1,34 @@
+parent: "configs/base.yaml"
+
+save_path: "output/tum/debug"
+
+# dataset params:
+type: "TUM"
+source_path: "data/TUM_RGBD/rgbd_dataset_freiburg1_desk"
+
+# state manage
+stable_confidence_thres: 200
+unstable_time_window: 150
+memory_length: 5
+
+# optimize params:
+gaussian_update_iter: 50
+gaussian_update_frame: 4
+position_lr : 0.001
+feature_lr : 0.001
+opacity_lr : 0.000
+scaling_lr : 0.02
+rotation_lr : 0.001
+
+use_gt_pose: False
+use_orb_backend: True
+orb_useicp: True
+icp_use_model_depth: True
+
+# track params
+use_gt_pose: False
+icp_use_model_depth: True # if False, use dataset depth frame to frame
+icp_matches_threshold: 0.2 # ratio * valie pixels
+icp_normal_threshold: 20 # degree
+icp_sample_distance_threshold: 0.01 # m
+icp_sample_normal_threshold: 0.01 # cos similarity
