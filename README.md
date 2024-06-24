@@ -63,6 +63,14 @@ bash scripts/download_replica.sh
 ```bash
 bash scripts/download_tum.sh
 ```
+And copy config file to data folder.
+```bash
+cp configs/tum/dataset/fr1_desk.yaml data/TUM_RGBD/rgbd_dataset_freiburg1_desk/config.yaml
+cp configs/tum/dataset/fr2_xyz.yaml data/TUM_RGBD/rgbd_dataset_freiburg2_xyz/config.yaml
+cp configs/tum/dataset/fr3_office.yaml data/TUM_RGBD/rgbd_dataset_freiburg3_long_office_household/config.yaml
+```
+
+
 ### 2.3 ScanNet++
 Please follow [ScanNet++](https://kaldir.vc.in.tum.de/scannetpp/) to download dataset. And run
 ```bash
