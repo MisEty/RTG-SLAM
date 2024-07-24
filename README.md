@@ -52,6 +52,14 @@ cd thirdParty/pybind/examples
 python orbslam_rgbd_tum.py # please set voc_path, association_path ...
 python eval_ate.py path_to_groundtruth.txt trajectory.txt --plot PLOT --verbose
 ```
+If you encount the problem `SIGSEGV` similar to  [raulmur/ORB_SLAM2#844](https://github.com/raulmur/ORB_SLAM2/pull/844)  [silencht/SG-SLAM#31](https://github.com/silencht/SG-SLAM/issues/31), you can try to modify 'thirdParty/ORB-SLAM2-PYBIND/CMakeLists.txt'
+```
+#set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE}")
+SET(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -O3 -march=native")
+#set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE}")
+SET(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O3 -march=native")
+```
+
 If the code runs without any error and the trajetory is corret, you can move on to the next step.
 
 ## 2. Dataset Preparation
