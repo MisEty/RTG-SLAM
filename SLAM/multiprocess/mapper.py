@@ -271,7 +271,7 @@ class Mapping(object):
             )
             self.stable_pointcloud.cat(stable_params)
 
-    # Fix the confidence points
+    # Release the outlier points
     def gaussians_release(self, mask):
         if mask.sum() > 0:
             unstable_params = self.stable_pointcloud.remove(mask)
@@ -281,7 +281,7 @@ class Mapping(object):
             unstable_params["add_tick"] = self.time * devF(
                 torch.ones_like(unstable_params["add_tick"])
             )
-            self.stable_pointcloud.cat(unstable_params)
+            self.pointcloud.cat(unstable_params)
 
     # Remove too small/big gaussians, long time unstable gaussians, insolated_gaussians
     def gaussians_delete(self, unstable=True):
