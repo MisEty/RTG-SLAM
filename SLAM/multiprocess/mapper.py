@@ -15,6 +15,7 @@ from utils.loss_utils import l1_loss, l2_loss, ssim
 from cuda_utils._C import accumulate_gaussian_error
 from utils.monitor import Recorder
 
+
 class Mapping(object):
     def __init__(self, args, recorder=None) -> None:
         self.temp_pointcloud = GaussianPointCloud(args)
@@ -29,7 +30,7 @@ class Mapping(object):
         self.gaussian_update_iter = args.gaussian_update_iter
         self.gaussian_update_frame = args.gaussian_update_frame
         self.final_global_iter = args.final_global_iter
-        
+
         # # history management
         self.memory_length = args.memory_length
         self.optimize_frames_ids = []
@@ -44,8 +45,7 @@ class Mapping(object):
         self.KNN_num = args.KNN_num
         self.KNN_threshold = args.KNN_threshold
         self.history_merge_max_weight = args.history_merge_max_weight
-        
-        
+
         # points adding parameters
         self.uniform_sample_num = args.uniform_sample_num
         self.add_depth_thres = args.add_depth_thres
@@ -93,7 +93,7 @@ class Mapping(object):
         self.feature_lr_coef = args.feature_lr_coef
         self.scaling_lr_coef = args.scaling_lr_coef
         self.rotation_lr_coef = args.rotation_lr_coef
-        
+
     def mapping(self, frame, frame_map, frame_id, optimization_params):
         self.frame_map = frame_map
         self.gaussians_add(frame)
@@ -109,7 +109,7 @@ class Mapping(object):
                 if is_keyframe:
                     self.global_optimization(
                         optimization_params,
-                        select_keyframe_num=self.global_keyframe_num
+                        select_keyframe_num=self.global_keyframe_num,
                     )
             else:
                 if not is_keyframe or self.get_stable_num <= 0:
@@ -117,7 +117,7 @@ class Mapping(object):
                 else:
                     self.global_optimization(
                         optimization_params,
-                        select_keyframe_num=self.global_keyframe_num
+                        select_keyframe_num=self.global_keyframe_num,
                     )
                 self.gaussians_delete(unstable=False)
         self.gaussians_fix()
@@ -204,7 +204,6 @@ class Mapping(object):
                 pbar.set_postfix({"loss": "{0:1.5f}".format(loss)})
                 pbar.update(1)
 
-
         self.pointcloud.detach()
         self.iter = 0
 
@@ -272,6 +271,18 @@ class Mapping(object):
             self.stable_pointcloud.cat(stable_params)
 
     # Release the outlier points
+    # def gaussians_release(self, mask):
+    #     if mask.sum() > 0:
+    #         unstable_params = self.stable_pointcloud.remove(mask)
+    #         unstable_params["confidence"] = devF(
+    #             torch.zeros_like(unstable_params["confidence"])
+    #         )
+    #         unstable_params["add_tick"] = self.time * devF(
+    #             torch.ones_like(unstable_params["add_tick"])
+    #         )
+    #         self.pointcloud.cat(unstable_params)
+
+    # revert to previous version
     def gaussians_release(self, mask):
         if mask.sum() > 0:
             unstable_params = self.stable_pointcloud.remove(mask)
@@ -281,7 +292,7 @@ class Mapping(object):
             unstable_params["add_tick"] = self.time * devF(
                 torch.ones_like(unstable_params["add_tick"])
             )
-            self.pointcloud.cat(unstable_params)
+            self.stable_pointcloud.cat(unstable_params)
 
     # Remove too small/big gaussians, long time unstable gaussians, insolated_gaussians
     def gaussians_delete(self, unstable=True):
@@ -305,12 +316,10 @@ class Mapping(object):
             # delete_mask = (
             #     big_gaussian_mask | unstable_time_mask | isolated_gaussian_mask
             # )
-            delete_mask = (
-                big_gaussian_mask | unstable_time_mask 
-            )
+            delete_mask = big_gaussian_mask | unstable_time_mask
         else:
             # delete_mask = big_gaussian_mask | isolated_gaussian_mask
-            delete_mask = big_gaussian_mask 
+            delete_mask = big_gaussian_mask
         if self.verbose:
             print("===== points delete =====")
             print(
@@ -401,7 +410,9 @@ class Mapping(object):
         depth_loss = devF(torch.tensor(0))
         if render_mask is None:
             render_mask = devB(torch.ones(image.shape[:2]))
-            ssim_loss = 1 - ssim(image.permute(2,0,1), image_input["color_map"].permute(2,0,1))
+            ssim_loss = 1 - ssim(
+                image.permute(2, 0, 1), image_input["color_map"].permute(2, 0, 1)
+            )
         else:
             render_mask = render_mask.bool()
         # render_mask include depth == 0
@@ -461,15 +472,9 @@ class Mapping(object):
         self, frame, global_opt=False, sample_ratio=-1, unstable=True
     ):
         if unstable:
-            render_output = self.renderer.render(
-                frame,
-                self.unstable_params
-            )
+            render_output = self.renderer.render(frame, self.unstable_params)
         else:
-            render_output = self.renderer.render(
-                frame,
-                self.stable_params
-            )
+            render_output = self.renderer.render(frame, self.stable_params)
         unstable_T_map = render_output["T_map"]
 
         if global_opt:
@@ -477,10 +482,8 @@ class Mapping(object):
                 render_image = render_output["render"].permute(1, 2, 0)
                 gt_image = frame.original_image.permute(1, 2, 0).cuda()
                 image_diff = (render_image - gt_image).abs()
-                color_error = torch.sum(
-                    image_diff, dim=-1, keepdim=False
-                )
-                filter_mask = (render_image.sum(dim=-1) == 0)
+                color_error = torch.sum(image_diff, dim=-1, keepdim=False)
+                filter_mask = render_image.sum(dim=-1) == 0
                 color_error[filter_mask] = 0
                 tile_mask = colorerror2tilemask(color_error, 16, sample_ratio)
                 render_mask = (
@@ -510,9 +513,7 @@ class Mapping(object):
         # check error by backprojection
         check_frame = self.processed_frames[-1]
         check_map = self.processed_map[-1]
-        render_output = self.renderer.render(
-            check_frame, self.global_params
-        )
+        render_output = self.renderer.render(check_frame, self.global_params)
         # [unstable, stable]
         unstable_points_num = self.get_unstable_num
         stable_points_num = self.get_stable_num
@@ -590,9 +591,7 @@ class Mapping(object):
         self.gaussians_release(color_release_mask[~depth_delete_mask])
 
     # update all stable gaussians by keyframes render
-    def global_optimization(
-        self, update_args, select_keyframe_num=-1, is_end=False
-    ):
+    def global_optimization(self, update_args, select_keyframe_num=-1, is_end=False):
         print("===== global optimize =====")
         if select_keyframe_num == -1:
             self.gaussians_fix(mask=(self.pointcloud.get_confidence > -1))
@@ -633,21 +632,22 @@ class Mapping(object):
 
         # test random kframes
         random_kframes = False
-        
+
         select_keyframe_num = min(select_keyframe_num, self.get_keyframe_num)
         if random_kframes:
             if select_keyframe_num >= self.get_keyframe_num:
                 select_kframe_indexs = list(range(0, self.get_keyframe_num))
             else:
-                select_kframe_indexs = np.random.choice(np.arange(1, min(select_keyframe_num * 2, self.get_keyframe_num)),
-                                                        select_keyframe_num-1,
-                                                        replace=False).tolist() + [0]
+                select_kframe_indexs = np.random.choice(
+                    np.arange(1, min(select_keyframe_num * 2, self.get_keyframe_num)),
+                    select_keyframe_num - 1,
+                    replace=False,
+                ).tolist() + [0]
         else:
             select_kframe_indexs = list(range(select_keyframe_num))
-        
-        select_kframe_indexs = [i*-1-1 for i in select_kframe_indexs]
-            
-            
+
+        select_kframe_indexs = [i * -1 - 1 for i in select_kframe_indexs]
+
         select_frame = []
         select_map = []
         select_render_mask = []
@@ -847,9 +847,10 @@ class Mapping(object):
 
         # get the corresponding stable gaussians
         stable_render_output = self.renderer.render(
-            frame, self.stable_params,
+            frame,
+            self.stable_params,
         )
-        
+
         stable_index = stable_render_output["color_index_map"].permute(1, 2, 0)
         intersect_mask = stable_index[project_uv[:, 1], project_uv[:, 0]] >= 0
         indices = indices[unstable_mask][intersect_mask[:, 0]]
@@ -860,7 +861,7 @@ class Mapping(object):
             .squeeze(-1)
             .long()
         )
-        
+
         stable_normal_check = self.stable_pointcloud.get_normal[intersect_stable_index]
         stable_xyz_check = self.stable_pointcloud.get_xyz[intersect_stable_index]
         unstable_xyz_check = self.temp_pointcloud.get_xyz[indices]
@@ -980,7 +981,8 @@ class Mapping(object):
 
     def get_render_output(self, frame):
         render_output = self.renderer.render(
-            frame, self.global_params,
+            frame,
+            self.global_params,
         )
         self.model_map["render_color"] = render_output["render"].permute(1, 2, 0)
         self.model_map["render_depth"] = render_output["depth"].permute(1, 2, 0)
@@ -1104,7 +1106,6 @@ class Mapping(object):
             "confidence": confidence,
         }
         return global_prams
-
 
     @property
     def get_pixel_num(self):
@@ -1232,13 +1233,14 @@ class MappingProcess(Mapping):
             if "time" in self.input and self.input["time"] == -1:
                 del self.input
                 break
-            
+
             # run frame map update
             self.set_input()
             self.processed_tick.append(self.time)
-            self.mapping(self.frame, self.frame_map, self.input["time"], self.optimization_params)
+            self.mapping(
+                self.frame, self.frame_map, self.input["time"], self.optimization_params
+            )
             self.pack_map_to_tracker()
-
 
         # self.release_receive()
         self.global_optimization(self.optimization_params)
